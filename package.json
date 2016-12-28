@@ -1,5 +1,5 @@
 {
   "scripts": {
-    "packager": "electron-packager ./app app -all --out ./OutApp --version 1.4.13 --overwrite --icon=./app/ming.ico"
+    "package": "electron-packager ./app app -all --out ./OutApp --version 1.4.13 --overwrite --icon=./app/ming.ico"
   }
 }
