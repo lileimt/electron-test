@@ -5,21 +5,12 @@ const ipc = require('electron').ipcMain;
 const Menu = electron.Menu;
 const Tray = electron.Tray;
 
-let win;
-let appIcon;
-let new_win;
+let win = null;
+let appIcon = null;
+let new_win = null;
+let timer = null;
 
 function createWindow(){
-	//托盘
-	appIcon = new Tray('ming.ico');
-	let contextMenu = Menu.buildFromTemplate([
-		{label:'Item1',type:'radio'},
-		{label:'Item2',type:'radio'},
-		{label:'Item3',type:'radio',checked:true},
-		{label:'Item4',type:'radio'}
-	]);
-	appIcon.setToolTip('This is my application.');
-	appIcon.setContextMenu(contextMenu);
 	//创建窗口
 	win = new BrowserWindow({width:800,height:600,frame:false});
 	win.loadURL(`file://${__dirname}/index.html`);
@@ -29,7 +20,28 @@ function createWindow(){
 	});
 }
 
-app.on('ready',createWindow);
+app.on('ready',()=>{
+	createWindow();
+	//托盘
+	appIcon = new Tray('ming.ico');
+	let contextMenu = Menu.buildFromTemplate([
+		{label:'Item1',type:'normal',click:function(){console.log(sss);}},
+		{label:'Item2',type:'separator'},
+		{label:'close',type:'normal',click:function(){app.quit();}}
+	]);
+	appIcon.setToolTip('随想随享');
+	appIcon.setContextMenu(contextMenu);
+	appIcon.on('double-click',()=>{
+		win.isVisible() ? win.hide() : win.show();
+	});
+	//appIcon.on('balloon-show',()=>{
+	//	if(timer){
+	//		console.log('ssssssssssssssssssssss');
+	//	}
+	//	console.log('ddddddddddd');
+	//})
+});
+
 app.on('window-all-closed',()=>{
 	//if(process.platform !== 'darwin'){
 		app.quit();
@@ -55,11 +67,21 @@ ipc.on('change-main-size',(event,arg)=>{
 	win.show();
 });
 
+ipc.on('expand-window',()=>{
+	if(win.isMaximized()){
+		win.restore();
+	}else{
+		win.maximize();
+	}
+});
+
 ipc.on('new-window',()=>{
 	if(!new_win){
-		new_win = new BrowserWindow({width:400,height:300,frame:false});
+		new_win = new BrowserWindow({width:300,height:200,frame:false});
 		new_win.loadURL(`file://${__dirname}/index.html`);
-		new_win.setPosition(0,0);
+		const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize;
+		//console.log(width+":"+height);
+		new_win.setPosition(width-300,height-200);
 	}
 });
 
@@ -69,3 +91,29 @@ ipc.on('new-window-close',()=>{
 		new_win = null;
 	}
 });
+
+ipc.on('tray-shrink',()=>{
+	var bounds = appIcon.getBounds();
+	console.log(JSON.stringify(bounds));
+	if(timer){
+		clearInterval(timer);
+	}
+	var i = 0;
+	timer = setInterval(()=>{
+		if(i % 2 == 0){
+			appIcon.setImage('ming.ico');
+		}else{
+			appIcon.setImage('nodata.png');
+		}
+		i++;
+	},500);
+});
+
+ipc.on('tray-shrink-close',()=>{
+	if(timer){
+		clearInterval(timer);
+		timer = null;
+		appIcon.setImage('ming.ico');
+	}
+});
+

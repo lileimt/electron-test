@@ -3,9 +3,9 @@
 1.在项目文件夹下创建package.json文件，实现打包脚本
 
 {
-  "scripts": {
-    "package": "electron-packager ./app app -all --out ./OutApp --version 1.4.13 --overwrite --icon=./app/ming.ico"
-  }
+ "scripts": {
+   "package": "electron-packager ./app app -all --out ./OutApp --version 1.4.13 --overwrite --icon=./app/ming.ico"
+	}
 }
 
 ./app 指定项目文件夹
