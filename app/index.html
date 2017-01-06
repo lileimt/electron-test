@@ -75,6 +75,10 @@
 		document.getElementById('shrink-close').onclick = function(){
 			ipc.send('tray-shrink-close');
 		}	
+
+		setTimeout(function() {
+			ipc.send('new-window-close');
+		}, 2000);
 	</script>
 </body>
 </html>

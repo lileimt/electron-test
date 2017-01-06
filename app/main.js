@@ -14,7 +14,7 @@ function createWindow(){
 	//创建窗口
 	win = new BrowserWindow({width:800,height:600,frame:false});
 	win.loadURL(`file://${__dirname}/index.html`);
-	win.webContents.openDevTools();
+	//win.webContents.openDevTools();
 	win.on('closed',()=>{
 		win = null;
 	});
@@ -31,15 +31,42 @@ app.on('ready',()=>{
 	]);
 	appIcon.setToolTip('随想随享');
 	appIcon.setContextMenu(contextMenu);
-	appIcon.on('double-click',()=>{
+	
+	appIcon.on('double-click',(e,bounds)=>{
 		win.isVisible() ? win.hide() : win.show();
+		let size = electron.screen.getCursorScreenPoint();
+		console.log("x:"+size.x+",y:"+size.y);
 	});
-	//appIcon.on('balloon-show',()=>{
-	//	if(timer){
-	//		console.log('ssssssssssssssssssssss');
-	//	}
-	//	console.log('ddddddddddd');
-	//})
+	appIcon.on('mouse-move',()=>{
+		if(timer){
+			console.log('dddddddddd');
+		}
+		console.log('ssssssss');
+	});
+
+	setInterval(()=>{
+		if(timer){
+			let point = electron.screen.getCursorScreenPoint();
+			//console.log("x:"+point.x+",y:"+point.y);
+			let appIconRect = appIcon.getBounds();
+			setTimeout(()=>{
+				let pt = electron.screen.getCursorScreenPoint();
+				console.log(pt);
+				if(pt.x == point.x && pt.y == point.y){
+					console.log(appIconRect);
+					if(point.x >= appIconRect.x && point.x <= appIconRect.x+appIconRect.width &&
+						point.y >= appIconRect.y && point.y <= appIconRect.y+appIconRect.height){
+						if(!new_win){
+							new_win = new BrowserWindow({width:300,height:200,frame:false});
+							new_win.loadURL(`file://${__dirname}/index.html`);
+							const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize;
+							new_win.setPosition(width-300,height-200);
+						}
+					}
+				}
+			}, 500);
+		}
+	},600);
 });
 
 app.on('window-all-closed',()=>{
@@ -80,7 +107,6 @@ ipc.on('new-window',()=>{
 		new_win = new BrowserWindow({width:300,height:200,frame:false});
 		new_win.loadURL(`file://${__dirname}/index.html`);
 		const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize;
-		//console.log(width+":"+height);
 		new_win.setPosition(width-300,height-200);
 	}
 });
